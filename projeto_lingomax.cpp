@@ -12,6 +12,14 @@
 
 using namespace std;
 
+// Structs
+
+struct Index
+{
+    int cod;
+    int address;
+};
+
 struct Languages
 {
     int cod;
@@ -20,23 +28,42 @@ struct Languages
 
 struct Lessons
 {
-    int cod_lesson, cod_language, total_levels;
+    int cod_lesson;
+    int cod_language;
+    int total_levels;
 };
 
 struct Exercises
 {
-    int cod_exerc, difficulty_level, score, answer;
+    int cod_exerc;
+    int difficulty_level;
+    int score;
+    int answer;
     char desc[60];
 };
 
 struct Users
 {
-    int cod, language, current_level, total_score;
+    int cod, language;
+    int current_level;
+    int total_score;
     char name[30];
 };
 
+// Menus
+
+void menuUsers();
+void menuExercises();
+void menuLessons();
+void menuLanguages();
+
+// Protótipos de função
+
+// Programa principal
+
 int main()
 {
+    // Muda linguagem do terminal para PT-BR
     UINT CPAGE_UTF8 = 65001;
     UINT CPAGE_DEFAULT = GetConsoleOutputCP();
 
@@ -58,6 +85,18 @@ int main()
 
         switch (op)
         {
+        case 1:
+            menuUsers();
+            break;
+        case 2:
+            menuLanguages();
+            break;
+        case 3:
+            menuExercises();
+            break;
+        case 4:
+            menuLessons();
+            break;
         case 0:
             system("cls");
             cout << "\n\n\t\tObrigado por usar o programa!\n\n";
