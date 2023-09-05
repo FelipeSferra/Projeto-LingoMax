@@ -20,18 +20,20 @@ struct Index
     int address;
 };
 
+struct Users
+{
+    int cod;
+    char name[30];
+    int language;
+    int current_level;
+    int total_score;
+    int D_E_L_E_T_E;
+};
+
 struct Languages
 {
     int cod;
     char desc[40];
-    int D_E_L_E_T_E;
-};
-
-struct Lessons
-{
-    int cod_lesson;
-    int cod_language;
-    int total_levels;
     int D_E_L_E_T_E;
 };
 
@@ -45,39 +47,39 @@ struct Exercises
     int D_E_L_E_T_E;
 };
 
-struct Users
+struct Lessons
 {
-    int cod;
-    char name[30];
-    int language;
-    int current_level;
-    int total_score;
+    int cod_lesson;
+    int cod_language;
+    int total_levels;
     int D_E_L_E_T_E;
 };
 
 // Protótipos de função
 
 void menuUsers(Users *, Index *, int &);
-void menuLanguages(/* Languages *, int & */);
+void menuLanguages(Languages *, Index *, int &);
 void menuExercises(/* Exercises *, int & */);
 void menuLessons(/* Lessons *, int & */);
 
 void readUser(Users *, Index *, int &);
-void autoIndex(Index *, Users *, int);
-void printIndex(Index *, int);
-void includeUser();
+void autoIndexUser(Index *, Users *, int);
+void printIndexUser(Index *, int);
+void includeUser(Users *, Index *, int &);
 void deleteUser();
 void rearrangeUser();
 void exhaustiveUser();
-bool searchUser();
+bool searchUser(Users *, Index *, int &, int &, int);
 
-void readLanguage();
-void indexLanguage();
+void readLanguage(Languages *, Index *, int &);
+void autoIndexLanguage(Index *, Languages *, int);
+void printIndexLanguage(Index *, int);
 void includeLanguage();
 void deleteLanguage();
 void rearrangeLanguage();
 void exhaustiveLanguage();
 bool searchLanguage();
+void searchLanguageCod();
 
 void readExercise();
 void indexExercise();
@@ -111,9 +113,17 @@ int main()
 
     // Variáveis
 
+    // Usuários
+
     Index idxUser[20];
     Users u[20];
     int contUser;
+
+    // Idiomas
+
+    Index idxLanguage[20];
+    Languages l[20];
+    int contLanguage;
 
     int op = 999;
 
@@ -135,7 +145,7 @@ int main()
             menuUsers(u, idxUser, contUser);
             break;
         case 2:
-            //  menuLanguages();
+            menuLanguages(l, idxLanguage, contLanguage);
             break;
         case 3:
             //  menuExercises();
@@ -172,7 +182,6 @@ void menuUsers(Users *u, Index *idx, int &cont)
         cout << "[04] - Excluir Usuário\n";
         cout << "[05] - Reorganizar Tabela\n";
         cout << "[06] - Leitura Exaustiva\n";
-        cout << "[07] - Buscar Usuário\n";
         cout << "[00] - Voltar para o menu principal\n";
         cout << "Digite a opção desejada: ";
         cin >> op;
@@ -183,10 +192,10 @@ void menuUsers(Users *u, Index *idx, int &cont)
             readUser(u, idx, cont);
             break;
         case 2:
-            printIndex(idx, cont);
+            printIndexUser(idx, cont);
             break;
         case 3:
-            // includeUser();
+            includeUser(u, idx, cont);
             break;
         case 4:
             // deleteUser();
@@ -197,7 +206,52 @@ void menuUsers(Users *u, Index *idx, int &cont)
         case 6:
             // exhaustiveUser();
             break;
-        case 7:
+        case 0:
+            break;
+        default:
+            cout << "Opção inválida!\n";
+            system("pause");
+        }
+    }
+}
+
+void menuLanguages(Languages *l, Index *idx, int &cont)
+{
+    int op = 999;
+
+    while (op != 0)
+    {
+        system("cls");
+        cout << "\t\tMenu Idiomas - LingoMax\n\n";
+        cout << "[01] - Leitura de Idioma\n";
+        cout << "[02] - Imprimir Índices\n";
+        cout << "[03] - Incluir Idioma\n";
+        cout << "[04] - Excluir Idioma\n";
+        cout << "[05] - Reorganizar Tabela\n";
+        cout << "[06] - Leitura Exaustiva\n";
+        cout << "[00] - Voltar para o menu principal\n";
+        cout << "Digite a opção desejada: ";
+        cin >> op;
+
+        switch (op)
+        {
+        case 1:
+            readLanguage(l, idx, cont);
+            break;
+        case 2:
+            printIndexUser(idx, cont);
+            break;
+        case 3:
+            // includeLanguage(l,idx,cont);
+            break;
+        case 4:
+            // deleteLanguage();
+            break;
+        case 5:
+            // rearrangeLanguage();
+            break;
+        case 6:
+            // exhaustiveLanguage();
             break;
         case 0:
             break;
@@ -208,11 +262,12 @@ void menuUsers(Users *u, Index *idx, int &cont)
     }
 }
 
-void menuLanguages() {}
 void menuExercises() {}
 void menuLessons() {}
 
 // Funções
+
+// Usuários
 
 void readUser(Users *u, Index *idx, int &cont)
 {
@@ -239,12 +294,12 @@ void readUser(Users *u, Index *idx, int &cont)
     }
     cont = i - 1;
 
-    autoIndex(idx, u, cont);
+    autoIndexUser(idx, u, cont);
 
     system("pause");
 }
 
-void autoIndex(Index *idx, Users *u, int cont)
+void autoIndexUser(Index *idx, Users *u, int cont)
 {
     int aux, address_aux, i;
 
@@ -268,9 +323,9 @@ void autoIndex(Index *idx, Users *u, int cont)
     }
 }
 
-void printIndex(Index *idx, int cont)
+void printIndexUser(Index *idx, int cont)
 {
-    cout << "\n\tImpressão de Índices da tabela Usuários\n";
+    cout << "\n\tImpressão de Índices da tabela de Usuários\n";
 
     hr();
 
@@ -282,7 +337,143 @@ void printIndex(Index *idx, int cont)
     }
 
     cout << endl;
-    
+
+    system("pause");
+}
+
+void includeUser(Users *u, Index *idx, int &cont)
+{
+    int searchCode, pos;
+    char desc[40];
+
+    for (searchCode = 9; searchCode != 0;)
+    {
+        cout << "\n\nInforme o código do usuário que deseja incluir (digite 0 para sair): ";
+        cin >> searchCode;
+        if (searchUser(u, idx, cont, pos, searchCode))
+        {
+            hr();
+            cout << "\nUsuário já cadastrado - não pode ser cadastrado novamente!";
+            pos = idx[pos].address;
+            searchLanguageCod();
+            cout << "\nCódigo do usuário: " << u[pos].cod << endl;
+            cout << "\tNome: " << u[pos].name << endl;
+            cout << "\tIdioma: " << desc << endl;
+            cout << "\tNível atual: " << u[pos].current_level << endl;
+            cout << "\tPontuação: " << u[pos].total_score << endl;
+        }
+        else
+        {
+            cont++;
+            u[cont].cod = searchCode;
+            cout << "\nNome: ";
+            gets(u[cont].name);
+            u[cont].language = 0;
+            u[cont].current_level = 0;
+            u[cont].total_score = 0;
+            u[cont].D_E_L_E_T_E = 0;
+
+            autoIndexUser(idx, u, cont);
+
+            cout << "\n\nInclusão realizada com sucesso"
+        }
+    }
+}
+
+bool searchUser(Users *u, Index *idx, int &cont, int &pos, int cod)
+{
+    int i = 0;
+    int f = cont;
+    int m = (i + f) / 2;
+
+    for (; f >= i && cod != idx[m].cod; m = (i + f) / 2)
+    {
+        if (cod > idx[m].cod)
+        {
+            i = m + 1;
+        }
+        else
+        {
+            f = m - 1;
+        }
+    }
+    if (cod == idx[m].cod)
+    {
+        pos = m;
+        return true;
+    }
+
+    return false;
+}
+
+// Idiomas
+
+void readLanguage(Languages *l, Index *idx, int &cont)
+{
+    int i = 0;
+
+    cout << "\n\tLeitura de Idioma\n\n";
+
+    for (int saida = 1; i < 20 && saida != 0; i++)
+    {
+        cout << "\n\nCódigo do Idioma: ";
+        cin >> l[i].cod;
+        cin.ignore();
+        if (l[i].cod != 0)
+        {
+            cout << "\nDescrição: ";
+            gets(l[i].desc);
+            l[i].D_E_L_E_T_E = 0;
+        }
+        else
+            saida = 0;
+    }
+    cont = i - 1;
+
+    autoIndexLanguage(idx, l, cont);
+
+    system("pause");
+}
+
+void autoIndexLanguage(Index *idx, Languages *l, int cont)
+{
+    int aux, address_aux, i;
+
+    idx[0].cod = l[0].cod;
+    idx[0].address = 0;
+
+    for (int j = 1; j < cont; j++)
+    {
+        aux = l[j].cod;
+        address_aux = j;
+        i = j - 1;
+
+        for (; i >= 0 && idx[i].cod > aux; i--)
+        {
+            idx[i + 1].cod = idx[i].cod;
+            idx[i + 1].address = idx[i].address;
+        }
+
+        idx[i + 1].cod = aux;
+        idx[i + 1].address = address_aux;
+    }
+}
+
+void printIndexUser(Index *idx, int cont)
+{
+    cout << "\n\tImpressão de Índices da tabela de Idiomas\n";
+
+    hr();
+
+    for (int i = 0; i < cont; i++)
+    {
+        cout << "Código do Índice: " << idx[i].cod << endl;
+        cout << "Endereço físico do Idioma: " << idx[i].address << endl;
+        hr();
+    }
+
+    cout << endl;
+
     system("pause");
 }
 
