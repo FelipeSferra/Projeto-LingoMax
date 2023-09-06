@@ -65,20 +65,20 @@ void menuLessons(/* Lessons *, int & */);
 void readUser(Users *, Index *, int &);
 void autoIndexUser(Index *, Users *, int);
 void printIndexUser(Index *, int);
-void includeUser(Users *, Index *, int &, int);
+void includeUser(Users *, Index *, Languages *, Index *, int &, int &);
 void deleteUser();
 void rearrangeUser();
 void exhaustiveUser();
-void searchIncludeUser(Users *, Index *, Languages *, Index *, int &, int &, int);
+bool searchUser(Index *, int &, int &, int);
 
 void readLanguage(Languages *, Index *, int &);
 void autoIndexLanguage(Index *, Languages *, int);
 void printIndexLanguage(Index *, int);
-void includeLanguage();
+void includeLanguage(Languages *, Index *, int &);
 void deleteLanguage();
 void rearrangeLanguage();
 void exhaustiveLanguage();
-bool searchLanguage();
+bool searchLanguage(Index *, int &, int &, int);
 void searchLanguageCod(Languages *, Index *, int &, int, char *);
 
 void readExercise();
@@ -158,7 +158,7 @@ int main()
             cout << "\n\n\t\tObrigado por usar o programa!\n\n";
             break;
         default:
-            cout << "Opção inválida!\n";
+            cout << "\n\nOpção inválida!\n\n";
             system("pause");
         }
     }
@@ -196,16 +196,7 @@ void menuUsers(Users *u, Index *idx, Languages *l, Index *idxL, int &contL, int 
             printIndexUser(idx, cont);
             break;
         case 3:
-            system("cls");
-            cout << "\n\tMenu de Inclusão de Usuário\n\n";
-            for (int searchCode = 9; searchCode != 0;)
-            {
-                cout << "\n\nInforme o código do usuário que deseja incluir (digite 0 para sair): ";
-                cin >> searchCode;
-                cin.ignore();
-                if (searchCode != 0)
-                    searchIncludeUser(u, idx, l, idxL, contL, cont, searchCode);
-            }
+            includeUser(u, idx, l, idxL, contL, cont);
             break;
         case 4:
             // deleteUser();
@@ -219,7 +210,7 @@ void menuUsers(Users *u, Index *idx, Languages *l, Index *idxL, int &contL, int 
         case 0:
             break;
         default:
-            cout << "Opção inválida!\n";
+            cout << "\n\nOpção inválida!\n\n";
             system("pause");
         }
     }
@@ -252,7 +243,7 @@ void menuLanguages(Languages *l, Index *idx, int &cont)
             printIndexLanguage(idx, cont);
             break;
         case 3:
-            // includeLanguage(l,idx,cont);
+            includeLanguage(l, idx, cont);
             break;
         case 4:
             // deleteLanguage();
@@ -266,7 +257,7 @@ void menuLanguages(Languages *l, Index *idx, int &cont)
         case 0:
             break;
         default:
-            cout << "Opção inválida!\n";
+            cout << "\n\nOpção inválida!\n\n";
             system("pause");
         }
     }
@@ -281,6 +272,7 @@ void menuLessons() {}
 
 void readUser(Users *u, Index *idx, int &cont)
 {
+    system("cls");
     int i = 0;
 
     cout << "\n\tLeitura de Usuário\n\n";
@@ -305,6 +297,8 @@ void readUser(Users *u, Index *idx, int &cont)
     cont = i - 1;
 
     autoIndexUser(idx, u, cont);
+
+    cout << "\n\n";
 
     system("pause");
 }
@@ -336,6 +330,7 @@ void autoIndexUser(Index *idx, Users *u, int cont)
 
 void printIndexUser(Index *idx, int cont)
 {
+    system("cls");
     cout << "\n\tImpressão de Índices da tabela de Usuários\n";
 
     hr();
@@ -352,33 +347,54 @@ void printIndexUser(Index *idx, int cont)
     system("pause");
 }
 
-void includeUser(Users *u, Index *idx, int &cont, int cod)
+void includeUser(Users *u, Index *idx, Languages *l, Index *idxL, int &contL, int &cont)
 {
-    u[cont].cod = cod;
+    system("cls");
+    int pos;
+    for (int searchCode = 9; searchCode != 0;)
+    {
+        cout << "\n\nInforme o código do usuário que deseja incluir (digite 0 para sair): ";
+        cin >> searchCode;
+        cin.ignore();
+        if (searchUser(idx, cont, pos, searchCode))
+        {
+            char desc[40];
+            pos = idx[pos].address;
+            searchLanguageCod(l, idxL, contL, u[pos].language, desc);
 
-    hr();
-    cout << "Código: " << u[cont].cod;
-    cout << "\nNome: ";
-    gets(u[cont].name);
-    u[cont].language = 0;
-    u[cont].current_level = 0;
-    u[cont].total_score = 0;
-    u[cont].D_E_L_E_T_E = 0;
+            cout << "\nUsuário já cadastrado - não pode ser cadastrado novamente!\n\n";
+            hr();
+            cout << "\nCódigo do usuário: " << u[pos].cod << endl;
+            cout << "\tNome: " << u[pos].name << endl;
+            cout << "\tIdioma: " << desc << endl;
+            cout << "\tNível atual: " << u[pos].current_level << endl;
+            cout << "\tPontuação: " << u[pos].total_score << "\n\n";
+            hr();
+        }
+        else if (searchCode != 0)
+        {
+            u[cont].cod = searchCode;
+            cout << "\nNome: ";
+            gets(u[cont].name);
+            u[cont].language = 0;
+            u[cont].current_level = 0;
+            u[cont].total_score = 0;
+            u[cont].D_E_L_E_T_E = 0;
 
-    cont++;
+            cont++;
 
-    autoIndexUser(idx, u, cont);
+            autoIndexUser(idx, u, cont);
 
-    cout << "\n\nInclusão realizada com sucesso\n\n";
-    hr();
+            cout << "\n\nInclusão realizada com sucesso\n\n";
+        }
+    }
 }
 
-void searchIncludeUser(Users *u, Index *idx, Languages *l, Index *idxL, int &contL, int &cont, int cod)
+bool searchUser(Index *idx, int &cont, int &pos, int cod)
 {
     int i = 0;
     int f = cont;
     int m = (i + f) / 2;
-    char desc[40];
 
     for (; f >= i && cod != idx[m].cod; m = (i + f) / 2)
     {
@@ -393,28 +409,18 @@ void searchIncludeUser(Users *u, Index *idx, Languages *l, Index *idxL, int &con
     }
     if (cod == idx[m].cod)
     {
-        cout << "\nUsuário já cadastrado - não pode ser cadastrado novamente!\n";
-        i = idx[m].address;
-        searchLanguageCod(l, idxL, contL, u[i].language, desc);
+        pos = m;
+        return true;
+    }
 
-        hr();
-        cout << "\nCódigo do usuário: " << u[i].cod << endl;
-        cout << "\tNome: " << u[i].name << endl;
-        cout << "\tIdioma: " << desc << endl;
-        cout << "\tNível atual: " << u[i].current_level << endl;
-        cout << "\tPontuação: " << u[i].total_score << endl;
-        hr();
-    }
-    else
-    {
-        includeUser(u, idx, cont, cod);
-    }
+    return false;
 }
 
 // Idiomas
 
 void readLanguage(Languages *l, Index *idx, int &cont)
 {
+    system("cls");
     int i = 0;
 
     cout << "\n\tLeitura de Idioma\n\n";
@@ -436,6 +442,8 @@ void readLanguage(Languages *l, Index *idx, int &cont)
     cont = i - 1;
 
     autoIndexLanguage(idx, l, cont);
+
+    cout << "\n\n";
 
     system("pause");
 }
@@ -466,6 +474,7 @@ void autoIndexLanguage(Index *idx, Languages *l, int cont)
 
 void printIndexLanguage(Index *idx, int cont)
 {
+    system("cls");
     cout << "\n\tImpressão de Índices da tabela de Idiomas\n";
 
     hr();
@@ -480,6 +489,66 @@ void printIndexLanguage(Index *idx, int cont)
     cout << endl;
 
     system("pause");
+}
+
+void includeLanguage(Languages *l, Index *idx, int &cont)
+{
+    system("cls");
+    int pos;
+    for (int searchCode = 9; searchCode != 0;)
+    {
+        cout << "\n\nInforme o código do idioma que deseja incluir (digite 0 para sair): ";
+        cin >> searchCode;
+        cin.ignore();
+        if (searchLanguage(idx, cont, pos, searchCode))
+        {
+            pos = idx[pos].address;
+
+            cout << "\nIdioma já cadastrado - não pode ser cadastrado novamente!\n\n";
+            hr();
+            cout << "\nCódigo do idioma: " << l[pos].cod << endl;
+            cout << "\tDescrição: " << l[pos].desc << "\n\n";
+            hr();
+        }
+        else if (searchCode != 0)
+        {
+            l[cont].cod = searchCode;
+            cout << "\nDescrição: ";
+            gets(l[cont].desc);
+
+            cont++;
+
+            autoIndexLanguage(idx, l, cont);
+
+            cout << "\n\nInclusão realizada com sucesso\n\n";
+        }
+    }
+}
+
+bool searchLanguage(Index *idx, int &cont, int &pos, int cod)
+{
+    int i = 0;
+    int f = cont;
+    int m = (i + f) / 2;
+
+    for (; f >= i && cod != idx[m].cod; m = (i + f) / 2)
+    {
+        if (cod > idx[m].cod)
+        {
+            i = m + 1;
+        }
+        else
+        {
+            f = m - 1;
+        }
+    }
+    if (cod == idx[m].cod)
+    {
+        pos = m;
+        return true;
+    }
+
+    return false;
 }
 
 void searchLanguageCod(Languages *l, Index *idx, int &cont, int cod, char *desc)
