@@ -41,10 +41,10 @@ struct Languages
 struct Exercises
 {
     int cod;
+    char desc[120];
     int difficulty_level;
     int score;
     int answer;
-    char desc[120];
     int D_E_L_E_T_E;
 };
 
@@ -352,22 +352,22 @@ void menuExercises(Exercises *e, Index *idx, int &cont)
         switch (op)
         {
         case 1:
-            //readExercise();
+            readExercise(e,idx,cont);
             break;
         case 2:
             printIndexExercise(idx, e, cont);
             break;
         case 3:
-            //includeExercise();
+            includeExercise(e,idx,cont);
             break;
         case 4:
-            //deleteExercise();
+            deleteExercise(e,idx,cont);
             break;
         case 5:
-            //exhaustiveExercise();
+            exhaustiveExercise(idx,e,cont);
             break;
         case 6:
-            //rearrangeExercise();
+            rearrangeExercise(e,idx,cont);
             break;
         case 0:
             break;
@@ -541,7 +541,6 @@ void deleteUser(Users *u, Index *idx, Languages *l, Index *idxL, int &contL, int
     {
         cout << "\n\nInforme o código do usuário que deseja excluir (digite 0 para sair): ";
         cin >> searchCode;
-        cin.ignore();
         if (searchUser(idx, cont, pos, searchCode))
         {
             char desc[40];
@@ -798,7 +797,6 @@ void deleteLanguage(Languages *l, Index *idx, int &cont)
     {
         cout << "\n\nInforme o código do idioma que deseja excluir (digite 0 para sair): ";
         cin >> searchCode;
-        cin.ignore();
         if (searchLanguage(idx, cont, pos, searchCode))
         {
             pos = idx[pos].address;
@@ -855,7 +853,7 @@ void exhaustiveLanguage(Index *idx, Languages *l, int cont)
 {
     system("cls");
 
-    cout << "\t\tLeitura exastiva dos idiomas\n\n";
+    cout << "\t\tLeitura exaustiva dos idiomas\n\n";
 
     hr();
     for (int k = 0; k < cont; k++)
@@ -932,7 +930,37 @@ void searchLanguageCod(Languages *l, Index *idx, int cont, int cod, char *desc)
 
 // Exercícios
 
-void readExercise(Exercises *e, Index *idx, int &cont) {}
+void readExercise(Exercises *e, Index *idx, int &cont)
+{
+    system("cls");
+    int i = 0;
+
+    cout << "\t\tLeitura de Exercício\n\n";
+
+    for (int saida = 1; i < 20 && saida != 0; i++)
+    {
+        cout << "\n\nCódigo do Exercício: ";
+        cin >> e[i].cod;
+        if (e[i].cod != 0)
+        {
+            cout << "\nEnunciado: ";
+            gets(e[i].desc);
+            cout << "\nNível de dificuldade: ";
+            cin >> e[i].difficulty_level;
+            cout << "\nPontuação recebida ao acertar: ";
+            cin >> e[i].score;
+            cout << "\nDigito da resposta correta: ";
+            cin >> e[i].answer;
+            cin.ignore();
+            e[i].D_E_L_E_T_E = 0;
+        }
+        else
+            saida = 0;
+    }
+    cont = i - 1;
+
+    autoIndexExercise(idx, e, cont);
+}
 
 void autoIndexExercise(Index *idx, Exercises *e, int cont)
 {
@@ -989,15 +1017,179 @@ void printIndexExercise(Index *idx, Exercises *e, int cont)
     getch();
 }
 
-void includeExercise(Exercises *e, Index *idx, int &cont) {}
+void includeExercise(Exercises *e, Index *idx, int &cont)
+{
+    system("cls");
+    int pos;
 
-void deleteExercise(Exercises *e, Index *idx, int &cont) {}
+    cout << "\t\tInclusão de Exercício\n\n";
 
-void rearrangeExercise(Exercises *e, Index *idx, int &cont) {}
+    for (int searchCode = 9; searchCode != 0;)
+    {
+        cout << "\n\nInforme o código do exercício que deseja incluir (digite 0 para sair): ";
+        cin >> searchCode;
+        cin.ignore();
+        if (searchExercise(idx, cont, pos, searchCode))
+        {
+            pos = idx[pos].address;
+            if (e[pos].D_E_L_E_T_E == 1)
+            {
+                cout << "\nExercício na lista de Exclusão!\n\n";
+                cout << "Para usar esse código novamente reorganize a lista.\n\n";
+                hr();
+                cout << "\nCódigo do exercício: " << e[pos].cod << endl;
+                cout << "\tEnunciado: " << e[pos].desc << endl;
+                cout << "\tNível de dificuldade: " << e[pos].difficulty_level << endl;
+                cout << "\tPontuação obtida ao acertar: " << e[pos].score << endl;
+                cout << "\tDigito da resposta correta: " << e[pos].answer << endl;
+                hr();
+            }
+            else
+            {
+                cout << "\nExercício já cadastrado - não pode ser cadastrado novamente!\n\n";
+                hr();
+                cout << "\nCódigo do exercício: " << e[pos].cod << endl;
+                cout << "\tEnunciado: " << e[pos].desc << endl;
+                cout << "\tNível de dificuldade: " << e[pos].difficulty_level << endl;
+                cout << "\tPontuação obtida ao acertar: " << e[pos].score << endl;
+                cout << "\tDigito da resposta correta: " << e[pos].answer << endl;
+                hr();
+            }
+        }
+        else if (searchCode != 0)
+        {
+            cout << "\nEnunciado: ";
+            gets(e[pos].desc);
+            cout << "\nNível de dificuldade: ";
+            cin >> e[pos].difficulty_level;
+            cout << "\nPontuação recebida ao acertar: ";
+            cin >> e[pos].score;
+            cout << "\nDigito da resposta correta: ";
+            cin >> e[pos].answer;
+            e[pos].D_E_L_E_T_E = 0;
 
-void exhaustiveExercise(Index *idx, Exercises *e, int cont) {}
+            cont++;
 
-bool searchExercise(Index *idx, int cont, int &pos, int cod) {}
+            autoIndexExercise(idx, e, cont);
+
+            cout << "\n\nInclusão realizada com sucesso!\n\n";
+        }
+    }
+}
+
+void deleteExercise(Exercises *e, Index *idx, int &cont)
+{
+    system("cls");
+    int pos;
+    cout << "\t\tExclusão de Exercício\n\n";
+    for (int searchCode = 9; searchCode != 0;)
+    {
+        cout << "\n\nInforme o código do exercício que deseja excluir (digite 0 para sair): ";
+        cin >> searchCode;
+        if (searchExercise(idx, cont, pos, searchCode))
+        {
+            pos = idx[pos].address;
+
+            cout << "\nDados do exercício que será excluído: \n\n";
+            hr();
+            cout << "\nCódigo do exercício: " << e[pos].cod << endl;
+            cout << "\tEnunciado: " << e[pos].desc << endl;
+            cout << "\tNível de dificuldade: " << e[pos].difficulty_level << endl;
+            cout << "\tPontuação obtida ao acertar: " << e[pos].score << endl;
+            cout << "\tDigito da resposta correta: " << e[pos].answer << endl;
+            hr();
+
+            e[pos].D_E_L_E_T_E = 1;
+
+            cout << "\n\nExercício excluído com sucesso\n\n";
+        }
+        else if (searchCode != 0)
+        {
+            cout << "\n\nExercício não cadastrado\n\n";
+        }
+    }
+}
+
+void rearrangeExercise(Exercises *e, Index *idx, int &cont)
+{
+    int j = -1;
+    Exercises auxE[20];
+    Index auxIdx[20];
+
+    cout << "\n\n\t\tReorganizando Lista...\n\n";
+
+    for (int k = 0; k < cont; k++)
+    {
+        int i = idx[k].address;
+
+        if (e[i].D_E_L_E_T_E == 0)
+        {
+            j++;
+
+            auxE[j].cod = e[i].cod;
+            strcpy(auxE[j].desc, e[i].desc);
+            auxE[j].difficulty_level = e[i].difficulty_level;
+            auxE[j].score = e[i].score;
+            auxE[j].answer = e[i].answer;
+            auxE[j].D_E_L_E_T_E = 0;
+            auxIdx[j].cod = auxE[j].cod;
+            auxIdx[j].address = j;
+        }
+    }
+    for(int i = 0; i <= j; i++){
+        idx[i] = auxIdx[i];
+        e[i] = auxE[i];
+    }
+
+    cont = j + 1;
+    Sleep(3000);
+}
+
+void exhaustiveExercise(Index *idx, Exercises *e, int cont) {
+    system("cls");
+
+    cout << "\t\tLeitura exaustiva dos exercícios\n\n";
+
+    hr();
+    for(int k = 0; k < cont; k++){
+        int i = idx[k].address;
+        if(e[i].D_E_L_E_T_E == 0){
+            cout << "\nCódigo do exercício: " << e[i].cod << endl;
+            cout << "\tEnunciado: " << e[i].desc << endl;
+            cout << "\tNível de dificuldade: " << e[i].difficulty_level << endl;
+            cout << "\tPontuação obtida ao acertar: " << e[i].score << endl;
+            cout << "\tDigito da resposta correta: " << e[i].answer << endl;
+            hr();
+        }
+    }
+    getch();
+}
+
+bool searchExercise(Index *idx, int cont, int &pos, int cod)
+{
+    int i = 0, f = cont;
+    int m = (i + f) / 2;
+
+    for (; f >= i && cod != idx[m].cod; m = (i + f) / 2)
+    {
+        if (cod > idx[m].cod)
+        {
+            i = m + 1;
+        }
+        else
+        {
+            f = m - 1;
+        }
+    }
+
+    if (cod == idx[m].cod)
+    {
+        pos = idx[m].address;
+        return true;
+    }
+
+    return false;
+}
 
 void hr()
 {
