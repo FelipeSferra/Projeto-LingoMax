@@ -61,7 +61,7 @@ struct Lessons
 void menuUsers(Users *, Index *, Languages *, Index *, int &, int &);
 void menuLanguages(Languages *, Index *, int &);
 void menuExercises(Exercises *, Index *, int &);
-void menuLessons(/* Lessons *, int & */);
+void menuLessons(Lessons *, Index *, Languages *, Index *, int, int &);
 
 void readUser(Users *, Index *, int &);
 void autoIndexUser(Index *, Users *, int);
@@ -80,7 +80,7 @@ void deleteLanguage(Languages *, Index *, int &);
 void rearrangeLanguage(Languages *, Index *, int &);
 void exhaustiveLanguage(Index *, Languages *, int);
 bool searchLanguage(Index *, int, int &, int);
-void searchLanguageCod(Languages *, Index *, int, int, char *);
+void searchLanguageCod(Languages *, Index *, int, int &, char *, int = 0);
 
 void readExercise(Exercises *, Index *, int &);
 void autoIndexExercise(Index *, Exercises *, int);
@@ -91,15 +91,16 @@ void rearrangeExercise(Exercises *, Index *, int &);
 void exhaustiveExercise(Index *, Exercises *, int);
 bool searchExercise(Index *, int, int &, int);
 
-void readLesson();
-void indexLesson();
-void includeLesson();
-void deleteLesson();
-void rearrangeLesson();
-void exhaustiveLesson();
-bool searchLesson();
+void readLesson(Lessons *, Index *, Languages *, Index *, int &, int);
+void autoIndexLesson(Index *, Lessons *, int);
+void printIndexLesson(Index *, Lessons *, int);
+void includeLesson(Lessons *, Index *, Languages *, Index *, int &, int);
+void deleteLesson(Lessons *, Index *, Languages *, Index *, int &, int);
+void rearrangeLesson(Lessons *, Index *, int &);
+void exhaustiveLesson(Index *, Lessons *, Languages *, Index *, int, int);
+bool searchLesson(Index *, int, int &, int);
 
-void updateScore(Users *, Exercises *, int, int); // Passar resposta do usuário e resposta correta (int,int);
+void updateScore(Users *, Exercises *, bool); // Passar resposta do usuário e resposta correta (int,int);
 
 void hr();
 
@@ -193,6 +194,29 @@ int main()
 
     autoIndexExercise(idxExercise, e, contExercise);
 
+    // Lições
+
+    Index idxLesson[20];
+    Lessons ls[20];
+    int contLesson = 3;
+
+    ls[0].cod = 1;
+    ls[0].language = 2;
+    ls[0].total_levels = 3;
+    ls[0].status = 0;
+
+    ls[1].cod = 2;
+    ls[1].language = 3;
+    ls[1].total_levels = 3;
+    ls[1].status = 0;
+
+    ls[2].cod = 3;
+    ls[2].language = 1;
+    ls[2].total_levels = 3;
+    ls[2].status = 0;
+
+    autoIndexLesson(idxLesson, ls, contLesson);
+
     int op = 999;
 
     while (op != 0)
@@ -219,7 +243,7 @@ int main()
             menuExercises(e, idxExercise, contExercise);
             break;
         case 4:
-            // menuLessons();
+            menuLessons(ls, idxLesson, l, idxLanguage, contLanguage, contLesson);
             break;
         case 0:
             system("cls");
@@ -378,7 +402,54 @@ void menuExercises(Exercises *e, Index *idx, int &cont)
     }
 }
 
-void menuLessons() {}
+void menuLessons(Lessons *ls, Index *idx, Languages *l, Index *idxL, int contL, int &cont)
+{
+    int op = 999;
+
+    while (op != 0)
+    {
+        system("cls");
+        cout << "\t\tMenu Lições - LingoMax\n\n";
+        cout << "[01] - Leitura de Lição\n";
+        cout << "[02] - Imprimir Índices\n";
+        cout << "[03] - Incluir Lição\n";
+        cout << "[04] - Excluir Lição\n";
+        cout << "[05] - Leitura Exaustiva\n";
+        cout << "[06] - Reorganizar Lista\n";
+        cout << "[00] - Voltar para o menu principal\n";
+        cout << "Digite a opção desejada: ";
+        cin >> op;
+        cin.ignore();
+
+        switch (op)
+        {
+        case 1:
+            readLesson(ls, idx, l, idxL, cont, contL);
+            break;
+        case 2:
+            printIndexLesson(idx, ls, cont);
+
+            break;
+        case 3:
+
+            break;
+        case 4:
+
+            break;
+        case 5:
+
+            break;
+        case 6:
+
+            break;
+        case 0:
+            break;
+        default:
+            cout << "\n\nOpção inválida!\n\n";
+            getch();
+        }
+    }
+}
 
 // Funções
 
@@ -896,7 +967,7 @@ bool searchLanguage(Index *idx, int cont, int &pos, int cod)
     return false;
 }
 
-void searchLanguageCod(Languages *l, Index *idx, int cont, int cod, char *desc)
+void searchLanguageCod(Languages *l, Index *idx, int cont, int &cod, char *desc, int status)
 {
     int i = 0;
     int f = cont;
@@ -921,10 +992,12 @@ void searchLanguageCod(Languages *l, Index *idx, int cont, int cod, char *desc)
     else if (cod == 0)
     {
         strcpy(desc, "Ainda não iniciou os estudos");
+        cod = status;
     }
     else
     {
         strcpy(desc, "Idioma não cadastrado");
+        cod = status;
     }
 }
 
@@ -1197,6 +1270,111 @@ bool searchExercise(Index *idx, int cont, int &pos, int cod)
     }
 
     return false;
+}
+
+// Lições
+
+void readLesson(Lessons *ls, Index *idx, Languages *l, Index *idxL, int &cont, int contL)
+{
+    system("cls");
+    int i = 0;
+    int codL;
+    int op;
+    char desc[40];
+    cout << "\t\tLeitura de Lição\n\n";
+
+    for (int saida = 1; i < 20 && saida != 0; i++)
+    {
+        op = 2;
+        cout << "\n\nCódigo da Lição: ";
+        cin >> ls[i].cod;
+        if (ls[i].cod != 0)
+        {
+            cout << "\n\nQuantidade de níveis: ";
+            cin >> ls[i].total_levels;
+            while (op != 1)
+            {
+                cout << "\n\nCódigo do idioma: ";
+                cin >> codL;
+                searchLanguageCod(l, idxL, contL, codL, desc);
+                if (codL != 0)
+                {
+                    cout << "Este é o idioma escolhido para a lição " << ls[i].cod << "?\n";
+                    cout << desc << endl;
+                    cout << "\n[1] Sim | [2] Não\n";
+                    cin >> op;
+                }
+                else
+                    cout << "\nCódigo do idioma não encontrado!\n";
+                    
+                if (op == 1)
+                    ls[i].language = codL;
+                else
+                    cout << "\nDigite o código do idioma novamente.";
+            }
+        }
+        else
+            saida = 0;
+    }
+    cont = i - 1;
+
+    autoIndexLesson(idx, ls, cont);
+}
+
+void autoIndexLesson(Index *idx, Lessons *ls, int cont)
+{
+    int aux, address_aux, i;
+
+    idx[0].cod = ls[0].cod;
+    idx[0].address = 0;
+
+    for (int j = 1; j < cont; j++)
+    {
+        aux = ls[j].cod;
+
+        address_aux = j;
+        i = j - 1;
+
+        for (; i >= 0 && idx[i].cod > aux; i--)
+        {
+            idx[i + 1].cod = idx[i].cod;
+            idx[i + 1].address = idx[i].address;
+        }
+
+        idx[i + 1].cod = aux;
+        idx[i + 1].address = address_aux;
+    }
+}
+
+void printIndexLesson(Index *idx, Lessons *ls, int cont)
+{
+    system("cls");
+    cout << "\t\tImpressão de Índices da tabela de Lições\n\n";
+
+    hr();
+
+    if (cont <= 0)
+    {
+        cout << "\n\t\tNenhuma lição cadastrada\n\n";
+        hr();
+    }
+    else
+    {
+        for (int i = 0; i < cont; i++)
+        {
+            int j = idx[i].address;
+            cout << "Código do Índice: " << idx[i].cod << endl;
+            cout << "Endereço físico da Lição: " << idx[i].address << endl;
+
+            if (ls[j].status == 1)
+                cout << "--| Marcado na lista de exclusão |--" << endl;
+
+            hr();
+        }
+    }
+    cout << endl;
+
+    getch();
 }
 
 void hr()
