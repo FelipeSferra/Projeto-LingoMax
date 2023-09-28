@@ -104,7 +104,10 @@ void rankingUsers(Users *, int);
 void searchLanguageCod(Languages *, Index *, int, int &, char *, int = 0);
 void hr();
 bool binarySearch(Index *, int, int &, int);
-void updateScore(Users *, Exercises *, bool); // Passar resposta do usuário e resposta correta (int,int);
+void levelExercise(Exercises *, Exercises *, int &, int, int, int);
+void showExercise(Exercises, Users);
+void updateScore(Users, Exercises, bool);
+void levelUp(Users);
 
 // Programa principal
 
@@ -184,7 +187,7 @@ int main()
     e[0].status = 0;
 
     e[1].cod = 23;
-    e[1].difficulty_level = 1;
+    e[1].difficulty_level = 5;
     e[1].score = 15;
     strcpy(e[1].answer, "teste2");
     strcpy(e[1].desc, "Isso é um exercicio teste2");
@@ -273,6 +276,8 @@ void menuMainUser(Users *u, Index *idxU, Languages *l, Index *idxL, Exercises *e
     char desc[40];
     int pos;
     int op = 999;
+    Exercises auxE[20];
+    int contAuxE;
 
     while (op != 0)
     {
@@ -334,31 +339,34 @@ void menuMainUser(Users *u, Index *idxU, Languages *l, Index *idxL, Exercises *e
         {
             searchLanguageCod(l, idxL, contL, user.language, desc);
             system("cls");
-            cout << "\t\tMenu Principal - LingoMax\n\n";
+            cout << "\t\tMenu de Exercícios - LingoMax\n\n";
             hr();
-            cout << "Usuário: " << user.name << "\tNível: " << user.current_level << "\tIdioma: " << desc << "\tPontuação: " << user.total_score;
-            cout << "\n\n[01] - Menu de Inclusões\n";
-            cout << "[02] - Menu de Exercícios\n";
-            cout << "[00] - Sair\n";
-            cout << "Digite a opção desejada: ";
+            cout << "Usuário: " << user.name << "\tNível: " << user.current_level << "\tIdioma: " << desc << "\tPontuação: " << user.total_score << endl;
+            levelExercise(e, auxE, contAuxE, contE, user.current_level, user.language);
+            for (int i = 0; i < contAuxE; i++)
+            {
+                if (i < 10)
+                    cout << "\n[0" << (i + 1) << "] - " << auxE[i].cod << " - " << auxE[i].difficulty_level;
+                else
+                    cout << "\n[" << (i + 1) << "] - " << auxE[i].cod << " - " << auxE[i].difficulty_level;
+            }
+            cout << "\n[00] - Sair\n";
+            cout << "Digite o exercício desejado: ";
             cin >> op;
 
-            switch (op)
+            for (int i = 0; i < contAuxE; i++)
             {
-            case 1:
-
+                if (op == i + 1)
+                {
+                    showExercise(auxE[i], user);
+                }
+            }
+            if (op == 0)
+            {
                 break;
-            case 2:
-
-                break;
-            case 3:
-
-                break;
-            case 0:
-                system("cls");
-                cout << "\n\n\t\tObrigado por usar o programa!\n\n";
-                break;
-            default:
+            }
+            else if (op > contAuxE)
+            {
                 cout << "\n\nOpção inválida!\n\n";
                 getch();
             }
@@ -1656,19 +1664,23 @@ void rankingUsers(Users *u, int cont)
         {
             if (k == 0)
             {
-                cout << "🥇 " << " - " << rank[k].name << " - " << rank[k].total_score << endl;
+                cout << "🥇 "
+                     << " - " << rank[k].name << " - " << rank[k].total_score << endl;
             }
             else if (k == 1)
             {
-                cout << "🥈 " << " - " << rank[k].name << " - " << rank[k].total_score << endl;
+                cout << "🥈 "
+                     << " - " << rank[k].name << " - " << rank[k].total_score << endl;
             }
             else if (k == 2)
             {
-                cout << "🥉 " << " - " << rank[k].name << " - " << rank[k].total_score << endl;
+                cout << "🥉 "
+                     << " - " << rank[k].name << " - " << rank[k].total_score << endl;
             }
             else
             {
-                cout << (k + 1) << "# " << " - " << rank[k].name << " - " << rank[k].total_score << endl;
+                cout << (k + 1) << "# "
+                     << " - " << rank[k].name << " - " << rank[k].total_score << endl;
             }
         }
     }
@@ -1743,4 +1755,70 @@ bool binarySearch(Index *idx, int cont, int &pos, int cod)
     }
 
     return false;
+}
+
+void levelExercise(Exercises *e, Exercises *auxE, int &contE, int cont, int level, int language)
+{
+    contE = 0;
+    for (int i = 0; i < cont; i++)
+    {
+        if (e[i].difficulty_level <= level && e[i].language == language)
+        {
+            auxE[contE].cod = e[i].cod;
+            strcpy(auxE[contE].desc, e[i].desc);
+            auxE[contE].difficulty_level = e[i].difficulty_level;
+            auxE[contE].score = e[i].score;
+            strcpy(auxE[contE].answer, e[i].answer);
+            auxE[contE].language = e[i].language;
+            auxE[contE].status = 0;
+            contE++;
+        }
+    }
+}
+
+void showExercise(Exercises e, Users u)
+{
+    char answer[40];
+    bool aux = false;
+    cout << "\t\tExercício\n\n";
+
+    cout << "Responda corretamente\n";
+    cout << e.desc << endl;
+    cout << "O exercício vale " << e.score << " pontos\n";
+
+    cout << "Digite sua resposta: ";
+    gets(answer);
+
+    if (strcmp(answer, e.answer) == 0)
+    {
+        cout << "Resposta correta\n";
+        aux = true;
+    }
+    else
+    {
+        cout << "Resposta incorreta\n";
+    }
+    updateScore(u, e, aux);
+    getch();
+}
+
+void updateScore(Users u, Exercises e, bool response)
+{
+    if (response)
+    {
+        u.total_score = (u.total_score + e.score);
+    }
+    else
+    {
+        
+    }
+}
+
+void levelUp(Users u)
+{
+    if (u.total_score > 100)
+    {
+        u.current_level = u.current_level + 1;
+        u.total_score = 0;
+    }
 }
