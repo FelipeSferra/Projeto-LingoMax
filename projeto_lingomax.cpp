@@ -57,8 +57,17 @@ struct Lessons
     int status;
 };
 
-// Protótipos de função
+struct Ranking
+{
+    int cod;
+    int score;
+    int language;
+    int level;
+};
 
+// Protótipos de função
+void menuMain();
+void menuInclude(Users *, Index *, Languages *, Index *, Exercises *, Index *, Lessons *, Index *, int &, int &, int &, int &);
 void menuUsers(Users *, Index *, Languages *, Index *, int &, int &);
 void menuLanguages(Languages *, Index *, int &);
 void menuExercises(Exercises *, Index *, Languages *, Index *, int &, int);
@@ -97,6 +106,7 @@ void deleteLesson(Lessons *, Index *, Languages *, Index *, int &, int);
 void rearrangeLesson(Lessons *, Index *, int &);
 void exhaustiveLesson(Index *, Lessons *, Languages *, Index *, int, int);
 
+void rankingUsers(Users *, Ranking *, int);
 void updateScore(Users *, Exercises *, bool); // Passar resposta do usuário e resposta correta (int,int);
 
 void hr();
@@ -113,6 +123,8 @@ int main()
     SetConsoleOutputCP(CPAGE_UTF8);
 
     // Variáveis
+
+    Ranking rank[20];
 
     // Usuários
 
@@ -224,10 +236,8 @@ int main()
     {
         system("cls");
         cout << "\t\tMenu Principal - LingoMax\n\n";
-        cout << "[01] - Menu Usuários\n";
-        cout << "[02] - Menu Idiomas\n";
-        cout << "[03] - Menu Exercícios\n";
-        cout << "[04] - Menu Lições\n";
+        cout << "[01] - Menu de Inclusões\n";
+        cout << "[02] - Menu de Exercícios\n";
         cout << "[00] - Sair\n";
         cout << "Digite a opção desejada: ";
         cin >> op;
@@ -235,16 +245,13 @@ int main()
         switch (op)
         {
         case 1:
-            menuUsers(u, idxUser, l, idxLanguage, contLanguage, contUser);
+            menuInclude(u, idxUser, l, idxLanguage, e, idxExercise, ls, idxLesson, contUser, contLanguage, contExercise, contLesson);
             break;
         case 2:
-            menuLanguages(l, idxLanguage, contLanguage);
+            rankingUsers(u, rank, contUser);
             break;
         case 3:
-            menuExercises(e, idxExercise, l, idxLanguage, contExercise, contLanguage);
-            break;
-        case 4:
-            menuLessons(ls, idxLesson, l, idxLanguage, contLanguage, contLesson);
+
             break;
         case 0:
             system("cls");
@@ -260,6 +267,44 @@ int main()
 }
 
 // Menus
+void menuInclude(Users *u, Index *idxU, Languages *l, Index *idxL, Exercises *e, Index *idxE, Lessons *ls, Index *idxLs, int &contU, int &contL, int &contE, int &contLs)
+{
+    int op = 999;
+
+    while (op != 0)
+    {
+        system("cls");
+        cout << "\t\tMenu de Inclusões - LingoMax\n\n";
+        cout << "[01] - Menu Usuários\n";
+        cout << "[02] - Menu Idiomas\n";
+        cout << "[03] - Menu Exercícios\n";
+        cout << "[04] - Menu Lições\n";
+        cout << "[00] - Sair\n";
+        cout << "Digite a opção desejada: ";
+        cin >> op;
+
+        switch (op)
+        {
+        case 1:
+            menuUsers(u, idxU, l, idxL, contL, contU);
+            break;
+        case 2:
+            menuLanguages(l, idxL, contL);
+            break;
+        case 3:
+            menuExercises(e, idxE, l, idxL, contE, contL);
+            break;
+        case 4:
+            menuLessons(ls, idxLs, l, idxL, contL, contLs);
+            break;
+        case 0:
+            break;
+        default:
+            cout << "\n\nOpção inválida!\n\n";
+            getch();
+        }
+    }
+}
 
 void menuUsers(Users *u, Index *idx, Languages *l, Index *idxL, int &contL, int &cont)
 {
@@ -1524,6 +1569,61 @@ void exhaustiveLesson(Index *idx, Lessons *ls, Languages *l, Index *idxL, int co
             cout << "\tQuantidade de níveis: " << ls[i].total_levels << endl;
             cout << "\tIdioma: " << desc << "\n\n";
             hr();
+        }
+    }
+    getch();
+}
+
+void rankingUsers(Users *u, Ranking *rank, int cont)
+{
+
+    int aux, auxLv, auxL, auxS, i;
+
+    rank[0].cod = u[0].cod;
+    rank[0].score = u[0].total_score;
+    rank[0].level = u[0].current_level;
+    rank[0].language = u[0].language;
+
+    for (int j = 1; j < cont && u[j].status != 1; j++)
+    {
+        aux = u[j].cod;
+        auxLv = u[j].current_level;
+        auxL = u[j].language;
+        auxS = u[j].total_score;
+
+        i = j - 1;
+
+        for (; i >= 0 && rank[i].score < auxS; i--)
+        {
+            rank[i + 1].cod = rank[i].cod;
+            rank[i + 1].score = rank[i].score;
+            rank[i + 1].level = rank[i].level;
+            rank[i + 1].language = rank[i].language;
+        }
+        rank[i + 1].cod = aux;
+        rank[i + 1].score = auxS;
+        rank[i + 1].level = auxLv;
+        rank[i + 1].language = auxL;
+    }
+
+    cout << "Ranking\n\n";
+    for (int k = 0; k < cont && u[k].status != 1; k++)
+    {
+        if (k == 0)
+        {
+            cout << "🥇 " << rank[k].cod << " - " << rank[k].score << endl;
+        }
+        else if (k == 1)
+        {
+            cout << "🥈 " << rank[k].cod << " - " << rank[k].score << endl;
+        }
+        else if (k == 2)
+        {
+            cout << "🥉 " << rank[k].cod << " - " << rank[k].score << endl;
+        }
+        else
+        {
+            cout << (k + 1) << "º " << rank[k].cod << " - " << rank[k].score << endl;
         }
     }
     getch();
