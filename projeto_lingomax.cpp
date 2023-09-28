@@ -45,14 +45,15 @@ struct Exercises
     int difficulty_level;
     int score;
     char answer[30];
+    int language;
     int status;
 };
 
 struct Lessons
 {
     int cod;
-    int language;
     int total_levels;
+    int language;
     int status;
 };
 
@@ -60,7 +61,7 @@ struct Lessons
 
 void menuUsers(Users *, Index *, Languages *, Index *, int &, int &);
 void menuLanguages(Languages *, Index *, int &);
-void menuExercises(Exercises *, Index *, int &);
+void menuExercises(Exercises *, Index *, Languages *, Index *, int &, int);
 void menuLessons(Lessons *, Index *, Languages *, Index *, int, int &);
 
 void readUser(Users *, Index *, int &);
@@ -70,7 +71,6 @@ void includeUser(Users *, Index *, Languages *, Index *, int &, int &);
 void deleteUser(Users *, Index *, Languages *, Index *, int &, int &);
 void rearrangeUser(Users *, Index *, int &);
 void exhaustiveUser(Index *, Users *, Languages *, Index *, int, int);
-bool searchUser(Index *, int, int &, int);
 
 void readLanguage(Languages *, Index *, int &);
 void autoIndexLanguage(Index *, Languages *, int);
@@ -79,17 +79,15 @@ void includeLanguage(Languages *, Index *, int &);
 void deleteLanguage(Languages *, Index *, int &);
 void rearrangeLanguage(Languages *, Index *, int &);
 void exhaustiveLanguage(Index *, Languages *, int);
-bool searchLanguage(Index *, int, int &, int);
 void searchLanguageCod(Languages *, Index *, int, int &, char *, int = 0);
 
-void readExercise(Exercises *, Index *, int &);
+void readExercise(Exercises *, Index *, Languages *, Index *, int &, int);
 void autoIndexExercise(Index *, Exercises *, int);
 void printIndexExercise(Index *, Exercises *, int);
-void includeExercise(Exercises *, Index *, int &);
-void deleteExercise(Exercises *, Index *, int &);
+void includeExercise(Exercises *, Index *, Languages *, Index *, int &, int);
+void deleteExercise(Exercises *, Index *, Languages *, Index *, int &, int);
 void rearrangeExercise(Exercises *, Index *, int &);
-void exhaustiveExercise(Index *, Exercises *, int);
-bool searchExercise(Index *, int, int &, int);
+void exhaustiveExercise(Index *, Exercises *, Languages *, Index *, int, int);
 
 void readLesson(Lessons *, Index *, Languages *, Index *, int &, int);
 void autoIndexLesson(Index *, Lessons *, int);
@@ -98,11 +96,11 @@ void includeLesson(Lessons *, Index *, Languages *, Index *, int &, int);
 void deleteLesson(Lessons *, Index *, Languages *, Index *, int &, int);
 void rearrangeLesson(Lessons *, Index *, int &);
 void exhaustiveLesson(Index *, Lessons *, Languages *, Index *, int, int);
-bool searchLesson(Index *, int, int &, int);
 
 void updateScore(Users *, Exercises *, bool); // Passar resposta do usuário e resposta correta (int,int);
 
 void hr();
+bool binarySearch(Index *, int, int &, int);
 
 // Programa principal
 
@@ -176,6 +174,7 @@ int main()
     e[0].score = 30;
     strcpy(e[0].answer, "teste1");
     strcpy(e[0].desc, "Isso é um exercicio teste1");
+    e[0].language = 1;
     e[0].status = 0;
 
     e[1].cod = 23;
@@ -183,6 +182,7 @@ int main()
     e[1].score = 15;
     strcpy(e[1].answer, "teste2");
     strcpy(e[1].desc, "Isso é um exercicio teste2");
+    e[1].language = 3;
     e[1].status = 0;
 
     e[2].cod = 78;
@@ -190,6 +190,7 @@ int main()
     e[2].score = 50;
     strcpy(e[2].answer, "teste3");
     strcpy(e[2].desc, "Isso é um exercicio teste3");
+    e[2].language = 2;
     e[2].status = 0;
 
     autoIndexExercise(idxExercise, e, contExercise);
@@ -201,18 +202,18 @@ int main()
     int contLesson = 3;
 
     ls[0].cod = 1;
-    ls[0].language = 2;
     ls[0].total_levels = 3;
+    ls[0].language = 2;
     ls[0].status = 0;
 
     ls[1].cod = 2;
-    ls[1].language = 3;
     ls[1].total_levels = 3;
+    ls[1].language = 3;
     ls[1].status = 0;
 
     ls[2].cod = 3;
-    ls[2].language = 1;
     ls[2].total_levels = 3;
+    ls[2].language = 1;
     ls[2].status = 0;
 
     autoIndexLesson(idxLesson, ls, contLesson);
@@ -240,7 +241,7 @@ int main()
             menuLanguages(l, idxLanguage, contLanguage);
             break;
         case 3:
-            menuExercises(e, idxExercise, contExercise);
+            menuExercises(e, idxExercise, l, idxLanguage, contExercise, contLanguage);
             break;
         case 4:
             menuLessons(ls, idxLesson, l, idxLanguage, contLanguage, contLesson);
@@ -355,7 +356,7 @@ void menuLanguages(Languages *l, Index *idx, int &cont)
     }
 }
 
-void menuExercises(Exercises *e, Index *idx, int &cont)
+void menuExercises(Exercises *e, Index *idx, Languages *l, Index *idxL, int &cont, int contL)
 {
     int op = 999;
 
@@ -376,19 +377,19 @@ void menuExercises(Exercises *e, Index *idx, int &cont)
         switch (op)
         {
         case 1:
-            readExercise(e, idx, cont);
+            readExercise(e, idx, l, idxL, cont, contL);
             break;
         case 2:
             printIndexExercise(idx, e, cont);
             break;
         case 3:
-            includeExercise(e, idx, cont);
+            includeExercise(e, idx, l, idxL, cont, contL);
             break;
         case 4:
-            deleteExercise(e, idx, cont);
+            deleteExercise(e, idx, l, idxL, cont, contL);
             break;
         case 5:
-            exhaustiveExercise(idx, e, cont);
+            exhaustiveExercise(idx, e, l, idxL, cont, contL);
             break;
         case 6:
             rearrangeExercise(e, idx, cont);
@@ -428,19 +429,18 @@ void menuLessons(Lessons *ls, Index *idx, Languages *l, Index *idxL, int contL, 
             break;
         case 2:
             printIndexLesson(idx, ls, cont);
-
             break;
         case 3:
-
+            includeLesson(ls, idx, l, idxL, cont, contL);
             break;
         case 4:
-
+            deleteLesson(ls, idx, l, idxL, cont, contL);
             break;
         case 5:
-
+            exhaustiveLesson(idx, ls, l, idxL, cont, contL);
             break;
         case 6:
-
+            rearrangeLesson(ls, idx, cont);
             break;
         case 0:
             break;
@@ -552,7 +552,7 @@ void includeUser(Users *u, Index *idx, Languages *l, Index *idxL, int &contL, in
         cout << "\n\nInforme o código do usuário que deseja incluir (digite 0 para sair): ";
         cin >> searchCode;
         cin.ignore();
-        if (searchUser(idx, cont, pos, searchCode))
+        if (binarySearch(idx, cont, pos, searchCode))
         {
             char desc[40];
             pos = idx[pos].address;
@@ -612,7 +612,7 @@ void deleteUser(Users *u, Index *idx, Languages *l, Index *idxL, int &contL, int
     {
         cout << "\n\nInforme o código do usuário que deseja excluir (digite 0 para sair): ";
         cin >> searchCode;
-        if (searchUser(idx, cont, pos, searchCode))
+        if (binarySearch(idx, cont, pos, searchCode))
         {
             char desc[40];
             pos = idx[pos].address;
@@ -696,32 +696,6 @@ void exhaustiveUser(Index *idx, Users *u, Languages *l, Index *idxL, int contL, 
         }
     }
     getch();
-}
-
-bool searchUser(Index *idx, int cont, int &pos, int cod)
-{
-    int i = 0;
-    int f = cont;
-    int m = (i + f) / 2;
-
-    for (; f >= i && cod != idx[m].cod; m = (i + f) / 2)
-    {
-        if (cod > idx[m].cod)
-        {
-            i = m + 1;
-        }
-        else
-        {
-            f = m - 1;
-        }
-    }
-    if (cod == idx[m].cod)
-    {
-        pos = m;
-        return true;
-    }
-
-    return false;
 }
 
 // Idiomas
@@ -823,7 +797,7 @@ void includeLanguage(Languages *l, Index *idx, int &cont)
         cout << "\n\nInforme o código do idioma que deseja incluir (digite 0 para sair): ";
         cin >> searchCode;
         cin.ignore();
-        if (searchLanguage(idx, cont, pos, searchCode))
+        if (binarySearch(idx, cont, pos, searchCode))
         {
             pos = idx[pos].address;
             if (l[pos].status == 1)
@@ -849,6 +823,7 @@ void includeLanguage(Languages *l, Index *idx, int &cont)
             l[cont].cod = searchCode;
             cout << "\nDescrição: ";
             gets(l[cont].desc);
+            l[cont].status = 0;
 
             cont++;
 
@@ -868,7 +843,7 @@ void deleteLanguage(Languages *l, Index *idx, int &cont)
     {
         cout << "\n\nInforme o código do idioma que deseja excluir (digite 0 para sair): ";
         cin >> searchCode;
-        if (searchLanguage(idx, cont, pos, searchCode))
+        if (binarySearch(idx, cont, pos, searchCode))
         {
             pos = idx[pos].address;
 
@@ -941,32 +916,6 @@ void exhaustiveLanguage(Index *idx, Languages *l, int cont)
     getch();
 }
 
-bool searchLanguage(Index *idx, int cont, int &pos, int cod)
-{
-    int i = 0;
-    int f = cont;
-    int m = (i + f) / 2;
-
-    for (; f >= i && cod != idx[m].cod; m = (i + f) / 2)
-    {
-        if (cod > idx[m].cod)
-        {
-            i = m + 1;
-        }
-        else
-        {
-            f = m - 1;
-        }
-    }
-    if (cod == idx[m].cod)
-    {
-        pos = m;
-        return true;
-    }
-
-    return false;
-}
-
 void searchLanguageCod(Languages *l, Index *idx, int cont, int &cod, char *desc, int status)
 {
     int i = 0;
@@ -1003,15 +952,18 @@ void searchLanguageCod(Languages *l, Index *idx, int cont, int &cod, char *desc,
 
 // Exercícios
 
-void readExercise(Exercises *e, Index *idx, int &cont)
+void readExercise(Exercises *e, Index *idx, Languages *l, Index *idxL, int &cont, int contL)
 {
     system("cls");
     int i = 0;
-
+    char desc[40];
+    int lCod;
+    int op;
     cout << "\t\tLeitura de Exercício\n\n";
 
     for (int saida = 1; i < 20 && saida != 0; i++)
     {
+        op = 2;
         cout << "\n\nCódigo do Exercício: ";
         cin >> e[i].cod;
         cin.ignore();
@@ -1026,6 +978,28 @@ void readExercise(Exercises *e, Index *idx, int &cont)
             cin.ignore();
             cout << "\nResposta correta: ";
             gets(e[i].answer);
+            while (op != 1)
+            {
+                cout << "\nDigite o código do Idioma: ";
+                cin >> lCod;
+                searchLanguageCod(l, idxL, contL, lCod, desc);
+                if (lCod != 0)
+                {
+                    cout << "Este é o idioma escolhido para o exercício " << e[i].cod << "?\n";
+                    cout << desc << endl;
+                    cout << "\n[1] Sim | [2] Não\n";
+                    cin >> op;
+                }
+                else
+                    cout << "\nCódigo do idioma não encontrado!\n";
+
+                if (op == 1)
+                {
+                    e[i].language = lCod;
+                }
+                else
+                    cout << "\nDigite o código novamente.";
+            }
             e[i].status = 0;
         }
         else
@@ -1091,23 +1065,28 @@ void printIndexExercise(Index *idx, Exercises *e, int cont)
     getch();
 }
 
-void includeExercise(Exercises *e, Index *idx, int &cont)
+void includeExercise(Exercises *e, Index *idx, Languages *l, Index *idxL, int &cont, int contL)
 {
     system("cls");
     int pos;
+    char desc[40];
+    int op;
+    int lCod;
 
-    cout << "\t\tInclusão de Exercício\n\n";
+    cout << "\t\tInclusão de exercício\n\n";
 
     for (int searchCode = 9; searchCode != 0;)
     {
+        op = 2;
         cout << "\n\nInforme o código do exercício que deseja incluir (digite 0 para sair): ";
         cin >> searchCode;
         cin.ignore();
-        if (searchExercise(idx, cont, pos, searchCode))
+        if (binarySearch(idx, cont, pos, searchCode))
         {
             pos = idx[pos].address;
             if (e[pos].status == 1)
             {
+                searchLanguageCod(l, idxL, contL, e[pos].language, desc);
                 cout << "\nExercício na lista de Exclusão!\n\n";
                 cout << "Para usar esse código novamente reorganize a lista.\n\n";
                 hr();
@@ -1116,10 +1095,12 @@ void includeExercise(Exercises *e, Index *idx, int &cont)
                 cout << "\tNível de dificuldade: " << e[pos].difficulty_level << endl;
                 cout << "\tPontuação obtida ao acertar: " << e[pos].score << endl;
                 cout << "\tResposta correta: " << e[pos].answer << endl;
+                cout << "\tIdioma: " << desc << "\n\n";
                 hr();
             }
             else
             {
+                searchLanguageCod(l, idxL, contL, e[pos].language, desc);
                 cout << "\nExercício já cadastrado - não pode ser cadastrado novamente!\n\n";
                 hr();
                 cout << "\nCódigo do exercício: " << e[pos].cod << endl;
@@ -1127,6 +1108,7 @@ void includeExercise(Exercises *e, Index *idx, int &cont)
                 cout << "\tNível de dificuldade: " << e[pos].difficulty_level << endl;
                 cout << "\tPontuação obtida ao acertar: " << e[pos].score << endl;
                 cout << "\tResposta correta: " << e[pos].answer << endl;
+                cout << "\tIdioma: " << desc << "\n\n";
                 hr();
             }
         }
@@ -1142,6 +1124,28 @@ void includeExercise(Exercises *e, Index *idx, int &cont)
             cin.ignore();
             cout << "\nResposta correta: ";
             gets(e[cont].answer);
+            while (op != 1)
+            {
+                cout << "\nDigite o código do Idioma: ";
+                cin >> lCod;
+                searchLanguageCod(l, idxL, contL, lCod, desc);
+                if (lCod != 0)
+                {
+                    cout << "Este é o idioma escolhido para o exercício " << e[cont].cod << "?\n";
+                    cout << desc << endl;
+                    cout << "\n[1] Sim | [2] Não\n";
+                    cin >> op;
+                }
+                else
+                    cout << "\nCódigo do idioma não encontrado!\n";
+
+                if (op == 1)
+                {
+                    e[cont].language = lCod;
+                }
+                else
+                    cout << "\nDigite o código novamente.";
+            }
             e[cont].status = 0;
 
             cont++;
@@ -1153,18 +1157,20 @@ void includeExercise(Exercises *e, Index *idx, int &cont)
     }
 }
 
-void deleteExercise(Exercises *e, Index *idx, int &cont)
+void deleteExercise(Exercises *e, Index *idx, Languages *l, Index *idxL, int &cont, int contL)
 {
     system("cls");
     int pos;
-    cout << "\t\tExclusão de Exercício\n\n";
+    cout << "\t\tExclusão de exercício\n\n";
     for (int searchCode = 9; searchCode != 0;)
     {
         cout << "\n\nInforme o código do exercício que deseja excluir (digite 0 para sair): ";
         cin >> searchCode;
-        if (searchExercise(idx, cont, pos, searchCode))
+        if (binarySearch(idx, cont, pos, searchCode))
         {
+            char desc[40];
             pos = idx[pos].address;
+            searchLanguageCod(l, idxL, contL, e[pos].language, desc);
 
             cout << "\nDados do exercício que será excluído: \n\n";
             hr();
@@ -1173,6 +1179,7 @@ void deleteExercise(Exercises *e, Index *idx, int &cont)
             cout << "\tNível de dificuldade: " << e[pos].difficulty_level << endl;
             cout << "\tPontuação obtida ao acertar: " << e[pos].score << endl;
             cout << "\tDigito da resposta correta: " << e[pos].answer << endl;
+            cout << "\tIdioma: " << desc << "\n\n";
             hr();
 
             e[pos].status = 1;
@@ -1207,6 +1214,7 @@ void rearrangeExercise(Exercises *e, Index *idx, int &cont)
             auxE[j].difficulty_level = e[i].difficulty_level;
             auxE[j].score = e[i].score;
             strcpy(auxE[j].answer, e[i].answer);
+            auxE[j].language = e[i].language;
             auxE[j].status = 0;
             auxIdx[j].cod = auxE[j].cod;
             auxIdx[j].address = j;
@@ -1222,10 +1230,11 @@ void rearrangeExercise(Exercises *e, Index *idx, int &cont)
     Sleep(3000);
 }
 
-void exhaustiveExercise(Index *idx, Exercises *e, int cont)
+void exhaustiveExercise(Index *idx, Exercises *e, Languages *l, Index *idxL, int cont, int contL)
 {
     system("cls");
 
+    char desc[40];
     cout << "\t\tLeitura exaustiva dos exercícios\n\n";
 
     hr();
@@ -1234,42 +1243,17 @@ void exhaustiveExercise(Index *idx, Exercises *e, int cont)
         int i = idx[k].address;
         if (e[i].status == 0)
         {
+            searchLanguageCod(l, idxL, contL, e[i].language, desc);
             cout << "\nCódigo do exercício: " << e[i].cod << endl;
             cout << "\tEnunciado: " << e[i].desc << endl;
             cout << "\tNível de dificuldade: " << e[i].difficulty_level << endl;
             cout << "\tPontuação obtida ao acertar: " << e[i].score << endl;
             cout << "\tResposta correta: " << e[i].answer << endl;
+            cout << "\tIdioma: " << desc << "\n\n";
             hr();
         }
     }
     getch();
-}
-
-bool searchExercise(Index *idx, int cont, int &pos, int cod)
-{
-    int i = 0;
-    int f = cont;
-    int m = (i + f) / 2;
-
-    for (; f >= i && cod != idx[m].cod; m = (i + f) / 2)
-    {
-        if (cod > idx[m].cod)
-        {
-            i = m + 1;
-        }
-        else
-        {
-            f = m - 1;
-        }
-    }
-
-    if (cod == idx[m].cod)
-    {
-        pos = m;
-        return true;
-    }
-
-    return false;
 }
 
 // Lições
@@ -1278,7 +1262,7 @@ void readLesson(Lessons *ls, Index *idx, Languages *l, Index *idxL, int &cont, i
 {
     system("cls");
     int i = 0;
-    int codL;
+    int lCod;
     int op;
     char desc[40];
     cout << "\t\tLeitura de Lição\n\n";
@@ -1295,9 +1279,9 @@ void readLesson(Lessons *ls, Index *idx, Languages *l, Index *idxL, int &cont, i
             while (op != 1)
             {
                 cout << "\n\nCódigo do idioma: ";
-                cin >> codL;
-                searchLanguageCod(l, idxL, contL, codL, desc);
-                if (codL != 0)
+                cin >> lCod;
+                searchLanguageCod(l, idxL, contL, lCod, desc);
+                if (lCod != 0)
                 {
                     cout << "Este é o idioma escolhido para a lição " << ls[i].cod << "?\n";
                     cout << desc << endl;
@@ -1306,12 +1290,13 @@ void readLesson(Lessons *ls, Index *idx, Languages *l, Index *idxL, int &cont, i
                 }
                 else
                     cout << "\nCódigo do idioma não encontrado!\n";
-                    
+
                 if (op == 1)
-                    ls[i].language = codL;
+                    ls[i].language = lCod;
                 else
                     cout << "\nDigite o código do idioma novamente.";
             }
+            ls[i].status = 0;
         }
         else
             saida = 0;
@@ -1377,6 +1362,173 @@ void printIndexLesson(Index *idx, Lessons *ls, int cont)
     getch();
 }
 
+void includeLesson(Lessons *ls, Index *idx, Languages *l, Index *idxL, int &cont, int contL)
+{
+    system("cls");
+    int pos;
+    char desc[40];
+    int op;
+    int lCod;
+
+    cout << "\t\tInclusão de lição\n\n";
+
+    for (int searchCode = 9; searchCode != 0;)
+    {
+        op = 2;
+        cout << "\n\nInforme o código da lição que deseja incluir (digite 0 para sair): ";
+        cin >> searchCode;
+        cin.ignore();
+        if (binarySearch(idx, cont, pos, searchCode))
+        {
+            pos = idx[pos].address;
+            if (l[pos].status == 1)
+            {
+                searchLanguageCod(l, idxL, contL, ls[pos].language, desc);
+                cout << "\nLição na lista de Exclusão!\n\n";
+                cout << "Para usar esse código novamente reorganize a lista.\n\n";
+                hr();
+                cout << "\nCódigo da lição: " << ls[pos].cod << endl;
+                cout << "\tQuantidade de níveis: " << ls[pos].total_levels << endl;
+                cout << "\tIdioma: " << desc << "\n\n";
+                hr();
+            }
+            else
+            {
+                searchLanguageCod(l, idxL, contL, ls[pos].language, desc);
+                cout << "\nIdioma já cadastrado - não pode ser cadastrado novamente!\n\n";
+                hr();
+                cout << "\nCódigo da lição: " << ls[pos].cod << endl;
+                cout << "\tQuantidade de níveis: " << ls[pos].total_levels << endl;
+                cout << "\tIdioma: " << desc << "\n\n";
+                hr();
+            }
+        }
+        else if (searchCode != 0)
+        {
+            ls[cont].cod = searchCode;
+            cout << "\n\nQuantidade de níveis: ";
+            cin >> ls[cont].total_levels;
+            while (op != 1)
+            {
+                cout << "\n\nCódigo do idioma: ";
+                cin >> lCod;
+                searchLanguageCod(l, idxL, contL, lCod, desc);
+                if (lCod != 0)
+                {
+                    cout << "Este é o idioma escolhido para a lição " << ls[cont].cod << "?\n";
+                    cout << desc << endl;
+                    cout << "\n[1] Sim | [2] Não\n";
+                    cin >> op;
+                }
+                else
+                    cout << "\nCódigo do idioma não encontrado!\n";
+
+                if (op == 1)
+                    ls[cont].language = lCod;
+                else
+                    cout << "\nDigite o código do idioma novamente.";
+            }
+            ls[cont].status = 0;
+
+            cont++;
+
+            autoIndexLesson(idx, ls, cont);
+
+            cout << "\n\nInclusão realizada com sucesso\n\n";
+        }
+    }
+}
+
+void deleteLesson(Lessons *ls, Index *idx, Languages *l, Index *idxL, int &cont, int contL)
+{
+    system("cls");
+    int pos;
+    cout << "\t\tExclusão de lição\n\n";
+    for (int searchCode = 9; searchCode != 0;)
+    {
+        cout << "\n\nInforme o código da lição que deseja excluir (digite 0 para sair): ";
+        cin >> searchCode;
+        if (binarySearch(idx, cont, pos, searchCode))
+        {
+            char desc[40];
+            pos = idx[pos].address;
+            searchLanguageCod(l, idxL, contL, ls[pos].language, desc);
+
+            cout << "\nDados da lição que será excluído: \n\n";
+            hr();
+            cout << "\nCódigo da lição: " << ls[pos].cod << endl;
+            cout << "\tQuantidade de níveis: " << ls[pos].total_levels << endl;
+            cout << "\tIdioma: " << desc << "\n\n";
+            hr();
+
+            ls[pos].status = 1;
+
+            cout << "\n\nLição excluída com sucesso\n\n";
+        }
+        else if (searchCode != 0)
+        {
+            cout << "\n\nLição não cadastrada\n\n";
+        }
+    }
+}
+
+void rearrangeLesson(Lessons *ls, Index *idx, int &cont)
+{
+    int j = -1;
+    Lessons auxLs[20];
+    Index auxIdx[20];
+
+    cout << "\n\n\t\tReorganizando Lista...\n\n";
+
+    for (int k = 0; k < cont; k++)
+    {
+        int i = idx[k].address;
+
+        if (ls[i].status == 0)
+        {
+            j++;
+
+            auxLs[j].cod = ls[i].cod;
+            auxLs[j].total_levels = ls[i].total_levels;
+            auxLs[j].language = ls[i].language;
+            auxLs[j].status = 0;
+            auxIdx[j].cod = auxLs[j].cod;
+            auxIdx[j].address = j;
+        }
+    }
+    for (int i = 0; i <= j; i++)
+    {
+        idx[i] = auxIdx[i];
+        ls[i] = auxLs[i];
+    }
+
+    cont = j + 1;
+    Sleep(3000);
+}
+
+void exhaustiveLesson(Index *idx, Lessons *ls, Languages *l, Index *idxL, int cont, int contL)
+{
+    system("cls");
+
+    char desc[40];
+    cout << "\t\tLeitura exaustiva das lições\n\n";
+
+    hr();
+    for (int k = 0; k < cont; k++)
+    {
+        int i = idx[k].address;
+        if (ls[i].status == 0)
+        {
+            searchLanguageCod(l, idxL, contL, ls[i].language, desc);
+            cout << "\nCódigo da lição: " << ls[i].cod << endl;
+            cout << "\tQuantidade de níveis: " << ls[i].total_levels << endl;
+            cout << "\tIdioma: " << desc << "\n\n";
+            hr();
+        }
+    }
+    getch();
+}
+
 void hr()
 {
     for (int i = 0; i < 60; i++)
@@ -1384,4 +1536,31 @@ void hr()
         cout << "-";
     }
     cout << endl;
+}
+
+bool binarySearch(Index *idx, int cont, int &pos, int cod)
+{
+    int i = 0;
+    int f = cont;
+    int m = (i + f) / 2;
+
+    for (; f >= i && cod != idx[m].cod; m = (i + f) / 2)
+    {
+        if (cod > idx[m].cod)
+        {
+            i = m + 1;
+        }
+        else
+        {
+            f = m - 1;
+        }
+    }
+
+    if (cod == idx[m].cod)
+    {
+        pos = m;
+        return true;
+    }
+
+    return false;
 }
