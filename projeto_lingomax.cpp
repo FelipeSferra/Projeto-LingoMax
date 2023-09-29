@@ -47,6 +47,7 @@ struct Exercises
     char answer[30];
     int language;
     int status;
+    int answered = 0;
 };
 
 struct Lessons
@@ -55,6 +56,7 @@ struct Lessons
     int total_levels;
     int language;
     int status;
+    int finished = 0;
 };
 
 // Protótipos de função
@@ -105,9 +107,9 @@ void searchLanguageCod(Languages *, Index *, int, int &, char *, int = 0);
 void hr();
 bool binarySearch(Index *, int, int &, int);
 void levelExercise(Exercises *, Exercises *, int &, int, int, int);
-void showExercise(Exercises, Users);
-void updateScore(Users, Exercises, bool);
-void levelUp(Users);
+void showExercise(Exercises, Users &);
+void updateScore(Users &, Exercises, bool);
+void levelUp(Users &);
 
 // Programa principal
 
@@ -179,19 +181,19 @@ int main()
     int contExercise = 3;
 
     e[0].cod = 65;
-    e[0].difficulty_level = 2;
-    e[0].score = 30;
+    e[0].difficulty_level = 15;
+    e[0].score = 200;
     strcpy(e[0].answer, "teste1");
     strcpy(e[0].desc, "Isso é um exercicio teste1");
     e[0].language = 1;
     e[0].status = 0;
 
     e[1].cod = 23;
-    e[1].difficulty_level = 5;
-    e[1].score = 15;
+    e[1].difficulty_level = 15;
+    e[1].score = 200;
     strcpy(e[1].answer, "teste2");
     strcpy(e[1].desc, "Isso é um exercicio teste2");
-    e[1].language = 3;
+    e[1].language = 1;
     e[1].status = 0;
 
     e[2].cod = 78;
@@ -338,6 +340,7 @@ void menuMainUser(Users *u, Index *idxU, Languages *l, Index *idxL, Exercises *e
         else
         {
             searchLanguageCod(l, idxL, contL, user.language, desc);
+            levelUp(user);
             system("cls");
             cout << "\t\tMenu de Exercícios - LingoMax\n\n";
             hr();
@@ -1776,7 +1779,7 @@ void levelExercise(Exercises *e, Exercises *auxE, int &contE, int cont, int leve
     }
 }
 
-void showExercise(Exercises e, Users u)
+void showExercise(Exercises e, Users &u)
 {
     char answer[40];
     bool aux = false;
@@ -1785,6 +1788,8 @@ void showExercise(Exercises e, Users u)
     cout << "Responda corretamente\n";
     cout << e.desc << endl;
     cout << "O exercício vale " << e.score << " pontos\n";
+
+    cin.ignore();
 
     cout << "Digite sua resposta: ";
     gets(answer);
@@ -1802,19 +1807,19 @@ void showExercise(Exercises e, Users u)
     getch();
 }
 
-void updateScore(Users u, Exercises e, bool response)
+void updateScore(Users &u, Exercises e, bool response)
 {
     if (response)
     {
         u.total_score = (u.total_score + e.score);
     }
-    else
+    if(!response)
     {
-        u.total_score = u.total_score - (u.total_score * (10/100));
+        u.total_score = u.total_score - (e.score * 10/100);
     }
 }
 
-void levelUp(Users u)
+void levelUp(Users &u)
 {
     int level = u.total_score/100;
     if(level > u.current_level)
