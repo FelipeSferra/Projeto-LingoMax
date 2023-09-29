@@ -1810,15 +1810,13 @@ void updateScore(Users u, Exercises e, bool response)
     }
     else
     {
-        
+        u.total_score = u.total_score - (u.total_score * (10/100));
     }
 }
 
 void levelUp(Users u)
 {
-    if (u.total_score > 100)
-    {
-        u.current_level = u.current_level + 1;
-        u.total_score = 0;
-    }
+    int level = u.total_score/100;
+    if(level > u.current_level)
+        u.current_level = level;
 }
