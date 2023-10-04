@@ -60,7 +60,7 @@ struct Lessons
 };
 
 // Protótipos de função
-void menuMainUser(Users *, Index *, Languages *, Index *, Exercises *, Index *, Lessons *, Index *, int, int, int, int, Users &);
+void menuMainUser(Users *, Index *, Languages *, Index *, Exercises *, Lessons *, int, int, int, int, Users &, Exercises *, Index *, Lessons *, Index *, int, int &);
 void menuInclude(Users *, Index *, Languages *, Index *, Exercises *, Index *, Lessons *, Index *, int &, int &, int &, int &);
 void menuUsers(Users *, Index *, Languages *, Index *, int &, int &);
 void menuLanguages(Languages *, Index *, int &);
@@ -106,10 +106,12 @@ void rankingUsers(Users *, int);
 void searchLanguageCod(Languages *, Index *, int, int &, char *, int = 0);
 void hr();
 bool binarySearch(Index *, int, int &, int);
-void levelExercise(Exercises *, Exercises *, int &, int, int, int);
-void showExercise(Exercises, Users &);
+void levelExercise(Exercises *, Exercises *, Index *, int &, int, int, int);
+void showExercise(Exercises &, Users &);
 void updateScore(Users &, Exercises, bool);
 void levelUp(Users &);
+void verifyLesson(Lessons *, int, Exercises *, int, Lessons *, int &);
+void certificate(Lessons *, Index *, int, Users, Languages *, Index *, int);
 
 // Programa principal
 
@@ -124,6 +126,13 @@ int main()
     // Variáveis
     Users selectedUser;
     selectedUser.cod = 0;
+
+    Exercises auxE[20];
+    Index idxAuxE[20];
+    int contAuxE = 0;
+    Lessons auxLs[20];
+    Index idxAuxLs[20];
+    int contAuxLs = 0;
 
     // Usuários
 
@@ -181,7 +190,7 @@ int main()
     int contExercise = 3;
 
     e[0].cod = 65;
-    e[0].difficulty_level = 15;
+    e[0].difficulty_level = 17;
     e[0].score = 200;
     strcpy(e[0].answer, "teste1");
     strcpy(e[0].desc, "Isso é um exercicio teste1");
@@ -197,7 +206,7 @@ int main()
     e[1].status = 0;
 
     e[2].cod = 78;
-    e[2].difficulty_level = 5;
+    e[2].difficulty_level = 15;
     e[2].score = 50;
     strcpy(e[2].answer, "teste3");
     strcpy(e[2].desc, "Isso é um exercicio teste3");
@@ -218,12 +227,12 @@ int main()
     ls[0].status = 0;
 
     ls[1].cod = 2;
-    ls[1].total_levels = 3;
-    ls[1].language = 3;
+    ls[1].total_levels = 2;
+    ls[1].language = 1;
     ls[1].status = 0;
 
     ls[2].cod = 3;
-    ls[2].total_levels = 3;
+    ls[2].total_levels = 1;
     ls[2].language = 1;
     ls[2].status = 0;
 
@@ -239,6 +248,7 @@ int main()
         cout << "[02] - Menu de Exercícios\n";
         cout << "[03] - Ranking de usuários\n";
         cout << "[04] - Trocar Usuário\n";
+        cout << "[05] - Certificados de lição\n";
         cout << "[00] - Sair\n";
         cout << "Digite a opção desejada: ";
         cin >> op;
@@ -249,13 +259,16 @@ int main()
             menuInclude(u, idxUser, l, idxLanguage, e, idxExercise, ls, idxLesson, contUser, contLanguage, contExercise, contLesson);
             break;
         case 2:
-            menuMainUser(u, idxUser, l, idxLanguage, e, idxExercise, ls, idxLesson, contUser, contLanguage, contExercise, contLesson, selectedUser);
+            menuMainUser(u, idxUser, l, idxLanguage, e, ls, contUser, contLanguage, contExercise, contLesson, selectedUser, auxE, idxAuxE, auxLs, idxAuxLs, contAuxE, contAuxLs);
             break;
         case 3:
             rankingUsers(u, contUser);
             break;
         case 4:
             selectedUser.cod = 0;
+            break;
+        case 5:
+            certificate(auxLs, idxAuxLs, contAuxLs, selectedUser, l, idxLanguage, contLanguage);
             break;
         case 0:
             system("cls");
@@ -271,15 +284,14 @@ int main()
 }
 
 // Menus
-void menuMainUser(Users *u, Index *idxU, Languages *l, Index *idxL, Exercises *e, Index *idxE, Lessons *ls, Index *idxLs, int contU, int contL, int contE, int contLs, Users &user)
+void menuMainUser(Users *u, Index *idxU, Languages *l, Index *idxL, Exercises *e, Lessons *ls, int contU, int contL, int contE, int contLs, Users &user, Exercises *auxE, Index *idxAuxE, Lessons *auxLs, Index *idxAuxLs, int contAuxE, int &contAuxLs)
 {
     int codU;
     int codL;
     char desc[40];
     int pos;
     int op = 999;
-    Exercises auxE[20];
-    int contAuxE;
+    int j;
 
     while (op != 0)
     {
@@ -341,17 +353,34 @@ void menuMainUser(Users *u, Index *idxU, Languages *l, Index *idxL, Exercises *e
         {
             searchLanguageCod(l, idxL, contL, user.language, desc);
             levelUp(user);
+            levelExercise(e, auxE, idxAuxE, contAuxE, contE, user.current_level, user.language);
+            verifyLesson(ls, contLs, auxE, contAuxE, auxLs, contAuxLs);
+
             system("cls");
             cout << "\t\tMenu de Exercícios - LingoMax\n\n";
             hr();
+
             cout << "Usuário: " << user.name << "\tNível: " << user.current_level << "\tIdioma: " << desc << "\tPontuação: " << user.total_score << endl;
-            levelExercise(e, auxE, contAuxE, contE, user.current_level, user.language);
+
             for (int i = 0; i < contAuxE; i++)
             {
-                if (i < 10)
-                    cout << "\n[0" << (i + 1) << "] - " << auxE[i].cod << " - " << auxE[i].difficulty_level;
+                if (auxE[i].answered == 1)
+                {
+                    if (i < 10)
+                        cout << "\n[0" << (i + 1) << "] - " << auxE[i].cod << " - " << auxE[i].difficulty_level << " - "
+                             << "Concluído";
+                    else
+                        cout << "\n[" << (i + 1) << "] - " << auxE[i].cod << " - " << auxE[i].difficulty_level << " - "
+                             << "Concluído";
+                }
                 else
-                    cout << "\n[" << (i + 1) << "] - " << auxE[i].cod << " - " << auxE[i].difficulty_level;
+                {
+                    if (i < 10)
+                        cout << "\n[0" << (i + 1) << "] - " << auxE[i].cod << " - " << auxE[i].difficulty_level;
+                    else
+                        cout << "\n[" << (i + 1) << "] - " << auxE[i].cod << " - " << auxE[i].difficulty_level;
+                }
+                j = i;
             }
             cout << "\n[00] - Sair\n";
             cout << "Digite o exercício desejado: ";
@@ -359,7 +388,12 @@ void menuMainUser(Users *u, Index *idxU, Languages *l, Index *idxL, Exercises *e
 
             for (int i = 0; i < contAuxE; i++)
             {
-                if (op == i + 1)
+                if (op == i + 1 && auxE[i].answered == 1)
+                {
+                    cout << "\n\nEsse exercício já foi respondido!\n\n";
+                    getch();
+                }
+                else if (op == i + 1 && auxE[i].answered == 0)
                 {
                     showExercise(auxE[i], user);
                 }
@@ -547,7 +581,9 @@ void menuExercises(Exercises *e, Index *idx, Languages *l, Index *idxL, int &con
             exhaustiveExercise(idx, e, l, idxL, cont, contL);
             break;
         case 6:
+            cout << "\n\n\t\tReorganizando Lista...\n\n";
             rearrangeExercise(e, idx, cont);
+            Sleep(3000);
             break;
         case 0:
             break;
@@ -1477,8 +1513,6 @@ void rearrangeExercise(Exercises *e, Index *idx, int &cont)
     Exercises auxE[20];
     Index auxIdx[20];
 
-    cout << "\n\n\t\tReorganizando Lista...\n\n";
-
     for (int k = 0; k < cont; k++)
     {
         int i = idx[k].address;
@@ -1493,6 +1527,7 @@ void rearrangeExercise(Exercises *e, Index *idx, int &cont)
             auxE[j].score = e[i].score;
             strcpy(auxE[j].answer, e[i].answer);
             auxE[j].language = e[i].language;
+            auxE[j].answered = e[i].answered;
             auxE[j].status = 0;
             auxIdx[j].cod = auxE[j].cod;
             auxIdx[j].address = j;
@@ -1505,7 +1540,6 @@ void rearrangeExercise(Exercises *e, Index *idx, int &cont)
     }
 
     cont = j + 1;
-    Sleep(3000);
 }
 
 void rearrangeLesson(Lessons *ls, Index *idx, int &cont)
@@ -1760,7 +1794,28 @@ bool binarySearch(Index *idx, int cont, int &pos, int cod)
     return false;
 }
 
-void levelExercise(Exercises *e, Exercises *auxE, int &contE, int cont, int level, int language)
+void verifyLesson(Lessons *ls, int contLs, Exercises *e, int contE, Lessons *auxLs, int &contAuxLs)
+{
+    // int contAns;
+    int numAnswered = 0;
+    for (int i = 0; i < contLs; i++)
+    {
+        for (int j = 0; j < contE; j++)
+        {
+            if (e[j].language == ls[i].language && e[j].answered == 1)
+                numAnswered++;
+        }
+        if (numAnswered >= ls[i].total_levels)
+        {
+            auxLs[contAuxLs] = ls[i];
+            auxLs[contAuxLs].finished = 1;
+            contAuxLs++;
+        }
+    }
+    contAuxLs = numAnswered;
+}
+
+void levelExercise(Exercises *e, Exercises *auxE, Index *idxAuxE, int &contE, int cont, int level, int language)
 {
     contE = 0;
     for (int i = 0; i < cont; i++)
@@ -1777,10 +1832,13 @@ void levelExercise(Exercises *e, Exercises *auxE, int &contE, int cont, int leve
             contE++;
         }
     }
+    autoIndexExercise(idxAuxE, auxE, contE);
+    rearrangeExercise(auxE, idxAuxE, contE);
 }
 
-void showExercise(Exercises e, Users &u)
+void showExercise(Exercises &e, Users &u)
 {
+    system("cls");
     char answer[40];
     bool aux = false;
     cout << "\t\tExercício\n\n";
@@ -1797,6 +1855,7 @@ void showExercise(Exercises e, Users &u)
     if (strcmp(answer, e.answer) == 0)
     {
         cout << "Resposta correta\n";
+        e.answered = 1;
         aux = true;
     }
     else
@@ -1813,15 +1872,51 @@ void updateScore(Users &u, Exercises e, bool response)
     {
         u.total_score = (u.total_score + e.score);
     }
-    if(!response)
+    if (!response)
     {
-        u.total_score = u.total_score - (e.score * 10/100);
+        u.total_score = u.total_score - (e.score * 10 / 100);
     }
 }
 
 void levelUp(Users &u)
 {
-    int level = u.total_score/100;
-    if(level > u.current_level)
+    int level = u.total_score / 100;
+    if (level > u.current_level)
         u.current_level = level;
+}
+
+void certificate(Lessons *ls, Index *idxLs, int contLs, Users u, Languages *l, Index *idxL, int contL)
+{
+    char desc[40];
+    system("cls");
+    cout << "\t\tCertificados - LingoMax\n\n";
+    if (u.cod == 0)
+    {
+        cout << "Você precisa selecionar um usuário para entrar nesse tela.\n\n";
+        cout << "\nRedirecionando para o menu principal...\n";
+        Sleep(3000);
+    }
+    else
+    {
+        hr();
+        if (contLs <= 0)
+        {
+            cout << "\nAinda não possui nenhum certificado\n";
+            hr();
+        }
+        else
+        {
+            for (int i = 0; i < contLs; i++)
+            {
+                if (ls[i].finished == 1)
+                {
+                    searchLanguageCod(l, idxL, contL, ls[i].language, desc);
+                    cout << "Certificado " << (i + 1) << endl;
+                    cout << "O usuário " << u.name << " completou a lição " << ls[i].cod << ", no idioma " << desc << ".\n";
+                    hr();
+                }
+            }
+        }
+        getch();
+    }
 }
